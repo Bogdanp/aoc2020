@@ -26,32 +26,23 @@
   (find-invalid-number numbers))
 
 (define (find-contiguous-run ns n)
-  (let loop ([idx 0]
-             [subidx 0]
-             [run null]
-             [longest-run null])
-    (define pos (+ idx subidx))
-    (cond
-      [(< pos (vector-length ns))
-       (define new-run (cons (vector-ref ns pos) run))
-       (define run-sum (apply + new-run))
-       (cond
-         [(= run-sum n)
-          (loop (add1 idx) 0 null (if (> (length new-run)
-                                         (length longest-run))
-                                      new-run
-                                      longest-run))]
-         [(< run-sum n)
-          (loop idx (add1 subidx) new-run longest-run)]
+  (define-values (lo hi)
+    (let loop ([lo 0]
+               [hi (vector-length ns)])
+      (define sum
+        (for/sum ([n (in-vector ns lo hi)])
+          n))
+      (cond
+        [(> sum n) (loop lo (sub1 hi))]
+        [(< sum n) (loop (add1 lo) (add1 hi))]
+        [else (values lo hi)])))
 
-         [else
-          (loop (add1 idx) 0 null longest-run)])]
-      [else
-       (sort longest-run <)])))
+  (for/list ([n (in-vector ns lo hi)])
+    n))
 
 (define run
   (find-contiguous-run numbers invalid-number))
 
 (define weakness
-  (+ (first run)
-     (last  run)))
+  (+ (apply min run)
+     (apply max run)))
