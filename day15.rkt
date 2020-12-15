@@ -13,12 +13,10 @@
     (cond
       [(= turn turns) last]
       [(null? starting)
-       (define last-turn
-         (hash-ref counts last #f))
        (loop starting
              (hash-set counts last turn)
              (cond
-               [(hash-ref counts last #f) => (λ (t) (- turn last-turn))]
+               [(hash-ref counts last #f) => (λ (t) (- turn t))]
                [else 0])
              (add1 turn))]
       [else
