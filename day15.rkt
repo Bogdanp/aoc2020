@@ -1,29 +1,23 @@
 #lang racket/base
 
-(require racket/string)
+(require racket/fixnum
+         racket/list
+         racket/string)
 
 (define starting-numbers
   (map string->number (string-split (call-with-input-file "input15.txt" read-line) ",")))
 
 (define (interp nums turns)
-  (let loop ([starting nums]
-             [counts (hasheqv)]
-             [last #f]
-             [turn 0])
-    (cond
-      [(= turn turns) last]
-      [(null? starting)
-       (loop starting
-             (hash-set counts last turn)
-             (cond
-               [(hash-ref counts last #f) => (λ (t) (- turn t))]
-               [else 0])
-             (add1 turn))]
-      [else
-       (loop (cdr starting)
-             (hash-set counts last turn)
-             (car starting)
-             (add1 turn))])))
+  (define counts (make-hasheq))
+  (for ([(c i) (in-indexed nums)])
+    (hash-set! counts c (add1 i)))
+  (for/fold ([prev (last nums)])
+            ([turn (in-range (length nums) turns)])
+    (define new-count
+      (let ([t (hash-ref counts prev #f)])
+        (if t (fx- turn t) 0)))
+    (hash-set! counts prev turn)
+    new-count))
 
 (= (interp '(0 3 6) 2020) 436)
 (= (interp '(1 3 2) 2020) 1)
