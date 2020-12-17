@@ -61,3 +61,5 @@
         (if (hash-ref cs p #f)
             (display #\#)
             (display #\.))))))
+
+(= (hash-count (interp cubes 6)) 353)
